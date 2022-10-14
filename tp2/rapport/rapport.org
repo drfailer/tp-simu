@@ -1,6 +1,7 @@
 #+TITLE: TP2 - Simulation
 #+AUTHOR: Rémi CHASSAGNOL
 #+setupfile: ~/.emacs.d/emacs-config/org-setup-files/df-standard.org
+#+LATEX_HEADER: \usepackage{placeins}
 
 * Test de Mercenne Twister
 
@@ -39,6 +40,10 @@ répartition suivante:
 
 #+CAPTION: Répartition génération uniforme
 [[./img/uniforme.png]]
+
+On observe que les points sont répartit de manière assez uniforme sur l'espace,
+il n'y a pas de cluster apparent, on peut donc en conclure que le générateur est
+assez performant.
 
 * Reproduction d'une distribution discrète empirique
 
@@ -159,6 +164,8 @@ discEmpDist2 - 100000
 
 * Reproduction de distribution continues
 
+** Fonction =negEx=
+
 Dans cette partie, on va générer des nombre aléatoires suivant une loi
 exponentielle négative de moyenne donnée. Pour ce faire on utilise la technique
 d’anamorphose pour inverser la loi. On obtient donc la fonction suivante:
@@ -195,3 +202,73 @@ On obtient bien quelque chose de proche de 11 pour les 2 suites:
 mean for 1000: 11.0999044573
 mean for 1000000: 11.0119343037
 #+end_example
+
+On voit bien que la moyenne trouvé est proche de 11, on a donc bien le résultat
+souhaité.
+
+** Distribution discrète
+
+On souhaite maintenant utiliser la fonction précédente pour générer une
+distribution discrète de 1 à 22. On va donc utiliser un tableau pour récupérer
+les fréquences d'apparition des nombre entre 0 et 1, 1 et 2 et ainsi de
+suite. La dernier case contiendra la fréquence d'apparition des nombre plus
+grand que 22. Voici la fonction utilisé:
+
+#+BEGIN_SRC C
+void testDiscretisationNegExp(int n) {
+  int test23bins[23] = {0};
+  int i, j;
+  double r;
+
+  for (i = 0; i < n; ++i) {
+    r = negExp(11);
+    // recherche de la position dans le tableau
+    for (j = 0; j < 21; ++j) {
+      if (r >= j && r < j + 1) {
+        test23bins[j]++;
+      }
+    }
+    if (r >= 22) {
+      test23bins[22]++;
+    }
+  }
+
+  for (i = 0; i < 22; ++i) {
+    printf("%d: %d\n", i, test23bins[i]);
+  }
+}
+#+END_SRC
+
+*** Test pour 1000 tirages
+
+Dans un premier temps, on test avec *1000* tirages et on obtient le résultat suivant:
+
+#+name: fig:discNegExp1000
+#+CAPTION: Graphe discrétisation entre 0 et 22 pour 1000 tirages.
+[[./img/discNegExp1000.png]]
+
+\FloatBarrier
+
+On constate que la courbe décroît bien comme une loi exponentielle inverse,
+cependant on voit clairement des irrégularités.
+
+Sachant que l'on compte 135 tirages au dessus de 22 (ce qui n'est pas représenté
+dans le graphique ci-dessus), on trouve une moyenne réelle de
+
+TODO: moyenne
+
+*** Test pour 1000000 tirages
+
+Ensuite on reproduit la même expérience mais cette fois ci avec *1000000* tirages:
+
+#+name: fig:discNegExp1000000
+#+CAPTION: Graphe discrétisation entre 0 et 22 pour 1000000 tirages.
+[[./img/discNegExp1000000.png]]
+
+\FloatBarrier
+
+Ici on voit bien apparaître une loi exponentielle négative et la courbe est
+assez régulière.
+
+TODO: moyenne
+

@@ -235,8 +235,13 @@ int genrand_discEmpDist2(int nbClasses, int effectifs[]) {
   return output;
 }
 
-/* Permet de tester `genrand_discEmpDist()` en calculant le pourcentage
+/**
+ * discEmpDist:
+ *
+ * Permet de tester `genrand_discEmpDist()` en calculant le pourcentage
  * d'individus trouvés pour chaque classes.
+ *
+ * INPUT: `n` nombre de tirages de nombre aléatoires.
  */
 void discEmpDist(int n) {
   int t[3] = {0};
@@ -252,7 +257,8 @@ void discEmpDist(int n) {
   printf("C: %.10lf\n", (double) t[2] / n);
 }
 
-/* Permet de tester `genrand_discEmpDist2()` en calculant le pourcentage
+/**
+ * Permet de tester `genrand_discEmpDist2()` en calculant le pourcentage
  * d'individus trouvés pour chaque classes.
  */
 void discEmpDist2(int n) {
@@ -319,13 +325,14 @@ void testExp() {
   printf("mean for 1000: %.10lf\n", (double) r/1000);
 
   for (i = 0; i < 1000000; ++i) {
-    r += negExp(11);
+    /* r += negExp(11); */
   }
   printf("mean for 1000000: %.10lf\n", (double) r/1000000);
 }
 
-/* Test du générateur `negExp()` en calculant des effectifs sur des intervals
- * discrets.
+/* Test du générateur `negExp()` en calculant des effectifs sur des intervalles
+ * discrets de 0 à 22. Sachant que dernier case contiendra la fréquence
+ * d'apparition des nombre plus grand que 22.
  */
 void testDiscretisationNegExp(int n) {
   int test23bins[23] = {0};
@@ -335,7 +342,7 @@ void testDiscretisationNegExp(int n) {
   for (i = 0; i < n; ++i) {
     r = negExp(11);
     // recherche de la position dans le tableau
-    for (j = 0; j < 21; ++j) {
+    for (j = 0; j < 22; ++j) {
       if (r >= j && r < j + 1) {
         test23bins[j]++;
       }
@@ -345,10 +352,15 @@ void testDiscretisationNegExp(int n) {
     }
   }
 
-  for (i = 0; i < 22; ++i) {
-    printf("%d: %d\n", i, test23bins[i]);
+  for (i = 0; i < 23; ++i) {
+    printf("%d: %d\n", i+1, test23bins[i]);
   }
 }
+
+/******************************************************************************/
+/*                   lois de distributions non reversibles                    */
+/******************************************************************************/
+
 
 /******************************************************************************/
 /*                              ma fonction main                              */
@@ -362,7 +374,7 @@ void myMain() {
 
   /* testExp(); */
   /* testDiscretisationNegExp(1000); */
-  testDiscretisationNegExp(1000000);
+  /* testDiscretisationNegExp(1000000); */
 }
 
 /******************************************************************************/
