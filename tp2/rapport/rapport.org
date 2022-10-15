@@ -65,7 +65,7 @@ Pour ce faire, on utilise la fonction =genrand_real1()= et le principe suivant:
 Avec cette technique et sachant que =genrand_real1()= retourne des nombre
 pseudo-aléatoires uniformément répartit s dans $[0,1]$, on a bien 35% de chance
 de tirer un individus de la classe A, 45% de la classe B et 20% de la classe C.
- 
+
 Le code source de la fonction est le suivant:
 
 #+BEGIN_SRC C
@@ -272,3 +272,4 @@ assez régulière.
 
 TODO: moyenne
 
+TODO: fin tp
