@@ -62,9 +62,9 @@ attendue.
 
 * Génération uniforme entre A et B
 
-Pour générer un nombre aléatoire dans un intervalle $[a, b]$, nous allons utiliser
-la fonction =genrand_real1()= qui génère un nombre aléatoire entre 0 et 1. On
-obtient la fonction suivante:
+Pour générer un nombre aléatoire dans un intervalle $[a, b]$, nous allons
+utiliser la fonction =genrand_real1()= qui génère un nombre aléatoire entre 0 et 1
+(1 compris). On obtient la fonction suivante:
 
 #+BEGIN_SRC C
   /* Génère un nombre aléatoire compris entre `a` et `b`. */
@@ -150,8 +150,8 @@ C: 0.2003000000
 #+end_example
 
 On observe déjà de bons résultats pour 1000 tirages, et on peut effectivement
-voir que la précision augmente avec le nombre de tirages. On passe de près de 2%
-d'erreur sur la classe A pour 1000 à 0.2% pour 100 000 tirages.
+voir que la précision augmente avec le nombre de tirages. On passe de près de *2%*
+d'erreur sur la classe A pour 1000 à *0.2%* pour 100000 tirages.
 
 ** Fonction plus générique
 
@@ -161,7 +161,9 @@ fonction prend en entrée le nombre de classe et un tableau d'effectifs, qui
 correspond aux effectifs que l'on souhaite observer pour chaque classes. On
 commence par calculer l'effectif total puis, à l'aide d'une boucle =for=, on test
 pour toutes les classes, si l'effectif cumulé divisé par l’effectif total est
-supérieur ou égal à un nombre aléatoire =r= tiré à l'aide de =genrand_real1()=.
+supérieur ou égal à un nombre aléatoire =r= tiré à l'aide de
+=genrand_real1()=. Quand $r > \frac{effectif cumulé}{effectif total}$ alors =r=
+appartient à la classe =i=.
 
 #+BEGIN_SRC C
 int genrand_discEmpDist2(int nbClasses, int effectifs[]) {
@@ -217,7 +219,7 @@ double negExp(double mean) {
 #+END_SRC
 
 On test avec le code ci-dessous que la suite de nombre retournée par =negExp()=
-après un certain * nombre de tirage a bien un moyenne de 11.
+après un certain nombre de tirage a bien une moyenne de 11.
 
 #+BEGIN_SRC C
 void testExp() {
@@ -236,23 +238,26 @@ void testExp() {
 }
 #+END_SRC
 
-On obtient bien quelque chose de proche de 11 pour les 2 suites:
+On voit bien que la moyenne trouvé est proche de 11, on a donc bien le résultat
+souhaité. On constate aussi que plus le nombre de tirages est grand plus la
+précision augmente. C'est un résultat encourageant puisqu'on souhaite que la
+suite de nombres retournée par =negExp= converge vers une loi exponentielle
+négative de moyenne 11.
 
 #+begin_example
 mean for 1000: 11.0999044573
 mean for 1000000: 11.0119343037
 #+end_example
 
-On voit bien que la moyenne trouvé est proche de 11, on a donc bien le résultat
-souhaité.
-
 ** Distribution discrète
 
 On souhaite maintenant utiliser la fonction précédente pour générer une
 distribution discrète de 1 à 22. On va donc utiliser un tableau pour récupérer
 les fréquences d'apparition des nombre entre 0 et 1, 1 et 2 et ainsi de
-suite. La dernier case contiendra la fréquence d'apparition des nombre plus
+suite. La dernière case contiendra la fréquence d'apparition des nombre plus
 grand que 22. Voici la fonction utilisé:
+
+\clearpage
 
 #+BEGIN_SRC C
 void testDiscretisationNegExp(int n) {
@@ -292,11 +297,6 @@ Dans un premier temps, on test avec *1000* tirages et on obtient le résultat su
 On constate que la courbe décroît bien comme une loi exponentielle inverse,
 cependant on voit clairement des irrégularités.
 
-Sachant que l'on compte 135 tirages au dessus de 22 (ce qui n'est pas représenté
-dans le graphique ci-dessus), on trouve une moyenne réelle de
-
-TODO: moyenne
-
 *** Test pour 1000000 tirages
 
 Ensuite on reproduit la même expérience mais cette fois ci avec *1000000* tirages:
@@ -308,25 +308,29 @@ Ensuite on reproduit la même expérience mais cette fois ci avec *1000000* tira
 \FloatBarrier
 
 Ici on voit bien apparaître une loi exponentielle négative et la courbe est
-assez régulière.
-
-TODO: moyenne
+assez régulière. La suite de nombres retournée par =negExp= converge bien vers une
+loi exponentielle négative pour un grand nombre de valeurs. De plus, comme
+*Mercenne twister* est un générateur fiable (il ne boucle jamais sur les mêmes
+valeurs), on peut conclure que notre suite de nombre convergera toujours vers la
+loi souhaité même pour un très grand nombre de tirages.
 
 * Simulation de lois irréversibles
 
 ** Méthode avec des lancés de dés
 
 Dans cette partie, on va essayer de simuler une loi normale en utilisant un
-générateur de nombre pseudo-aléatoires. Le but est de sommer les résultats de 30
-lancés de dés 6 puis de comptabiliser cette somme dans un tableau d'effectifs
-d'intervalles discrets entre 30 et 180.
+générateur de nombre pseudo-aléatoires. Le but est de sommer les résultats de
+*30 lancés de dés 6* puis de comptabiliser cette somme dans un tableau
+d'effectifs d'intervalles discrets entre 30 et 180.
 
 *** Le générateur aléatoire
 
-Tout d'abord, implémentent le générateur qui retourne la somme des résultats de
+Tout d'abord, implémentons le générateur qui retourne la somme des résultats de
 30 lancés de dés 6. Pour cela, on va utiliser la fonction =genrand_int32()%6 + 1=
 car on veut un nombre entier entre 1 et 6. La somme des résultats est stockée
 dans la variable =acc=.
+
+\clearpage
 
 #+BEGIN_SRC C
 int genrand_gaussienne() {
@@ -347,7 +351,7 @@ La fonction retourne un nombre entre 30 et 180.
 
 Le but et de vérifier que notre méthode permet bien de simuler une loi
 normale. Tout d'abord il faut vérifier que la moyenne est bien environ égale à
-$\frac{30 + 180}{2} = 105$. Pour cela, on affiche le résulta de la fonction
+$\frac{30 + 180}{2} = 105$. Pour cela, on affiche le résultat de la fonction
 suivante:
 
 #+BEGIN_SRC C
@@ -373,10 +377,16 @@ par rapport au résultat souhaité.
 
 Maintenant, on va vérifier que la simulation s'approche bien d'une loi normale,
 pour ce faire, nous allons utiliser un tableau qui va contenir les effectifs des
-résultats trouvés. Les nombre tirés sont compris entre 30 et 180, il faut donc
-un tableau de taille 151 pour stocker tous les résultats possibles. Le principe
-est de tirer un nombre pseudo-aléatoires à l'aide de =genrand_gaussienne()= puis
-d'incrémenter la cases du tableau des effectifs. La fonction est la suivante:
+résultats trouvés. On procède de manière similaire que pour =negExp= sauf qu'ici,
+on peut directement incrémenter la bonne case de tableau car on ne traite plus
+avec des intervalles mais directement les valeurs.
+
+Les nombre tirés sont compris entre 30 et 180, il faut donc un tableau de taille
+151 pour stocker tous les résultats possibles. Le principe est de tirer un
+nombre pseudo-aléatoires à l'aide de =genrand_gaussienne()= puis d'incrémenter la
+cases du tableau des effectifs. La fonction est la suivante:
+
+\clearpage
 
 #+BEGIN_SRC C
   void simulationCourbeGauss(int n) {
@@ -410,8 +420,8 @@ simuler une soi normale.
 ** Box and Muller
 
 Ici l'objectif est le même que précédemment, sauf qu'on va utiliser la méthode
-de *Box et Muller* qui consiste à tirer deux nombre aléatoires suivant la formule
-suivante:
+de *Box et Muller* qui consiste à tirer deux nombres aléatoires suivant cette
+formule:
 
 \begin{align*}
 x_1 = \cos{2 \pi Rn_2} \times \sqrt(-2 \log(Rn_1)) \\
