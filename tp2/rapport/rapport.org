@@ -2,6 +2,44 @@
 #+AUTHOR: Rémi CHASSAGNOL
 #+setupfile: ~/.emacs.d/emacs-config/org-setup-files/df-standard.org
 #+LATEX_HEADER: \usepackage{placeins}
+#+DATE: 11 Octobre 2022
+#+OPTIONS: toc:nil title:nil
+
+#+begin_export latex
+\begin{titlepage}
+\begin{center}
+    
+    \textsc{\LARGE TP}\\[0.5cm]
+    
+    {\huge \bfseries Génération de variables aléatoires\\[4cm]}
+
+      \centering
+      \includegraphics[scale=1]{./img/banner.png}
+
+      \vspace*{\fill}
+
+    \begin{minipage}{0.9\textwidth}
+      \begin{flushleft} \large
+        CHASSAGNOL Rémi\\
+        ZZ2 - F2 - promo24\\[2cm]
+      \end{flushleft}
+    \end{minipage}
+
+    \begin{minipage}{0.9\textwidth}
+      \begin{flushright} \large
+        \emph{Professeur:} HILL Davide\\
+      \end{flushright}
+    \end{minipage}
+
+    \textsc{11 Octobre 2022}
+
+  \end{center}
+\end{titlepage}
+
+\clearpage
+\tableofcontents
+\clearpage
+#+end_export
 
 * Test de Mercenne Twister
 
