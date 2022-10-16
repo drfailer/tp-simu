@@ -41,6 +41,8 @@ répartition suivante:
 #+CAPTION: Répartition génération uniforme
 [[./img/uniforme.png]]
 
+\FloatBarrier
+
 On observe que les points sont répartit de manière assez uniforme sur l'espace,
 il n'y a pas de cluster apparent, on peut donc en conclure que le générateur est
 assez performant.
@@ -272,4 +274,151 @@ assez régulière.
 
 TODO: moyenne
 
-TODO: fin tp
+* Simulation de lois irréversibles
+
+** Méthode avec des lancés de dés
+
+Dans cette partie, on va essayer de simuler une loi normale en utilisant un
+générateur de nombre pseudo-aléatoires. Le but est de sommer les résultats de 30
+lancés de dés 6 puis de comptabiliser cette somme dans un tableau d'effectifs
+d'intervalles discrets entre 30 et 180.
+
+*** Le générateur aléatoire
+
+Tout d'abord, implémentent le générateur qui retourne la somme des résultats de
+30 lancés de dés 6. Pour cela, on va utiliser la fonction =genrand_int32()%6 + 1=
+car on veut un nombre entier entre 1 et 6. La somme des résultats est stockée
+dans la variable =acc=.
+
+#+BEGIN_SRC C
+int genrand_gaussienne() {
+  int i;
+  int acc = 0;
+
+  for (i = 0; i < 30; ++i) {
+    acc += genrand_int32()%6 + 1;
+  }
+
+  return acc;
+}
+#+END_SRC
+
+La fonction retourne un nombre entre 30 et 180.
+
+*** Calcule de la moyenne
+
+Le but et de vérifier que notre méthode permet bien de simuler une loi
+normale. Tout d'abord il faut vérifier que la moyenne est bien environ égale à
+$\frac{30 + 180}{2} = 105$. Pour cela, on affiche le résulta de la fonction
+suivante:
+
+#+BEGIN_SRC C
+double moyenneGaussienne(int n) {
+  int i;
+  double acc = 0;
+
+  for (i = 0; i < n; ++i) {
+    acc += genrand_gaussienne();
+  }
+  return acc / n;
+}
+#+END_SRC
+
+#+begin_example
+104.953200
+#+end_example
+
+Pour 1000000 tirages, on a bien une moyenne proche de 105, ce qui est logique
+par rapport au résultat souhaité.
+
+*** Courbe de Gauss
+
+Maintenant, on va vérifier que la simulation s'approche bien d'une loi normale,
+pour ce faire, nous allons utiliser un tableau qui va contenir les effectifs des
+résultats trouvés. Les nombre tirés sont compris entre 30 et 180, il faut donc
+un tableau de taille 151 pour stocker tous les résultats possibles. Le principe
+est de tirer un nombre pseudo-aléatoires à l'aide de =genrand_gaussienne()= puis
+d'incrémenter la cases du tableau des effectifs. La fonction est la suivante:
+
+#+BEGIN_SRC C
+  void simulationCourbeGauss(int n) {
+    int i;
+    int r;
+    int testBins[151] = {0};
+
+    // remplissage du tableau
+    for (i = 0; i < n; ++i) {
+      r = genrand_gaussienne();
+      testBins[r - 30]++;
+    }
+
+    // affichage des effectifs
+    for (i = 0; i < 150; ++i) {
+      printf("%d\n", testBins[i]);
+    }
+  }
+#+END_SRC
+
+On obtient le résultat suivant:
+
+#+CAPTION: résultats simulation courbe de Gauss
+[[./img/gauss.png]]
+
+\FloatBarrier
+
+On voit bien sur ce graphique que les résultats sont cohérents, on a bien
+simuler une soi normale.
+
+** Box and Muller
+
+Ici l'objectif est le même que précédemment, sauf qu'on va utiliser la méthode
+de *Box et Muller* qui consiste à tirer deux nombre aléatoires suivant la formule
+suivante:
+
+\begin{align*}
+x_1 = \cos{2 \pi Rn_2} \times \sqrt(-2 \log(Rn_1)) \\
+x_2 = \sin{2 \pi Rn_2} \times \sqrt(-2 \log(Rn_1))
+\end{align*}
+
+La fonction est la suivante:
+
+#+BEGIN_SRC C
+void boxAndMuller(int n) {
+  double x[2];
+  int testBins[20] = {0};
+  int i, j;
+  double borne;
+
+  for (i = 0;  i <= n; ++i) {
+    genrand_boxAndMuller(x);
+
+    j = 0;
+    for (borne = -5; borne < 5; borne += 0.5) { // place x1 et x2 dans `testBins`
+      if ((x[0] >= borne && x[0] < borne + 0.5)
+          || (x[1] >= borne && x[1] < borne + 0.5)) {
+        testBins[j]++;
+      }
+      ++j;
+    }
+  }
+  // affichage
+  for (i = 0; i < 20; ++i) {
+    printf("%d\n", testBins[i]);
+  }
+}
+#+END_SRC
+
+On commence par remplir la tableau =testBins= qui contient les effectifs des
+tirages appartenant à des intervalles discrets de taille $0.5$ sur $[-5; 5]$,
+ensuite on affiche =testBins=. Voici les résultats dans un tableur:
+
+#+CAPTION: Box and Muller sur [-5; 5]
+[[./img/boxAndMuller.png]]
+
+On constate à nouveau que les effectifs sur les intervalles sont répartit
+suivant une loi normale.
+
+* Bibliothèque =Box and Muller=
+
+- *C/C++:* https://github.com/lfarizav/pseudorandomnumbergenerators
+- *Java:* https://github.com/mmiklavc/box-muller

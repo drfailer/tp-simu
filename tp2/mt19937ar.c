@@ -190,7 +190,7 @@ double genrand_res53(void) {
  * Génère un nombre aléatoire compris entre `a` et `b`.
  *
  * PARAMS:
- * a - debut intervalle (double)
+ * a - début intervalle (double)
  * b - fin intervalle (double)
  *
  * RETURN:
@@ -335,6 +335,45 @@ void statDistributionDiscrete(int n) {
  */
 double negExp(double mean) { return -mean * log(1 - genrand_real2()); }
 
+/**
+ * NAME: testDiscretisationNegExp
+ *
+ * Test du générateur `negExp()` en calculant des effectifs sur des intervalles
+ * discrets de 0 à 22. Sachant que la dernière case contiendra la fréquence
+ * d'apparition des nombre plus grand que 22.
+ *
+ * PARAMS:
+ * n - nombre de tirages aléatoires
+ *
+ * OUTPUT:
+ * - affichage des effectifs des intervalles.
+ */
+void testDiscretisationNegExp(int n) {
+  int    test22bins[23] = {0};
+  int    i, j;
+  double r;
+
+  for (i = 0; i < n; ++i) {
+    r = negExp(11);
+
+    if (r < 22) {
+      // recherche de la position dans le tableau
+      for (j = 0; j < 22; ++j) {
+        if (r >= j && r < j + 1) {
+          test22bins[j]++;
+          j = 22; // sortie de boucle
+        }
+      }
+    } else {
+      test22bins[22]++;
+    }
+  }
+
+  for (i = 0; i < 23; ++i) {
+    printf("%d: %d\n", i + 1, test22bins[i]);
+  }
+}
+
 /******************************************************************************/
 /*                      simulation de loi non réversible                      */
 /******************************************************************************/
@@ -343,9 +382,9 @@ double negExp(double mean) { return -mean * log(1 - genrand_real2()); }
  * NAME: genrand_gaussian
  *
  * RETURN:
- * some des 30 résultats de lancé de dé 6.
+ * somme des 30 résultats de lancé de dé 6.
  */
-int genrand_gaussian() {
+int genrand_gaussienne() {
   int i;
   int acc = 0;
 
@@ -365,33 +404,101 @@ int genrand_gaussian() {
  * RETURN:
  * moyenne sur `n` tirages de `genrand_gaussian`.
  */
-double gaussianAverage(int n) {
+double moyenneGaussienne(int n) {
   int i;
-  int acc = 0;
+  double acc = 0;
 
   for (i = 0; i < n; ++i) {
-    acc += genrand_gaussian();
+    acc += genrand_gaussienne();
   }
-  return (double) acc / n;
+  return acc / n;
 }
 
-void simulateBellCurve(int testBins[], int numberOfBins, int n) {
-  int i, j;
-  double r;
+/**
+ * NAME: simulationCourbeGauss
+ *
+ *  Simulation d'une coube de bell en utilisant un tableau d'intervalles
+ *  discrets de taille `nombreBins`.
+ *
+ * PARAMS:
+ * n - nombre de tirages à effectuer.
+ *
+ * OUTPUT:
+ * - affichage des effectifs pour chaque intervalles
+ */
+void simulationCourbeGauss(int n) {
+  int i;
+  int r;
+  int testBins[151] = {0};
 
+  // remplissage du tableau
   for (i = 0; i < n; ++i) {
-    r = genrand_gaussian();
+    r = genrand_gaussienne();
+    testBins[r - 30]++;
+  }
 
-    if (r < numberOfBins) {
-      // recherche de la position dans le tableau
-      for (j = 0; j < numberOfBins - 1; ++j) {
-        if (r >= j && r < j + 1) {
-          testBins[j]++;
-        }
+  // affichage des effectifs
+  for (i = 0; i < 150; ++i) {
+    printf("%d\n", testBins[i]);
+  }
+}
+
+/**
+ * NAME: genrand_boxAndMuller
+ *
+ * Génère 2 nombre aléatoires suivant une loi normale à l'aide de la méthode de
+ * Box and Muller.
+ *
+ * PARAMS:
+ * x - tableau de taille 2 (x1, x2)
+ *
+ * SIDE-EFFECTS:
+ * - modifie `x` pour y ajouter les valeurs de x1 et x2 générés selon la formule
+ *   de Box and Muller
+ */
+void genrand_boxAndMuller(double x[2]) {
+  double rn1, rn2;
+
+  rn1 = genrand_real1();
+  rn2 = genrand_real1();
+  x[0] = cos(2 * M_PI * rn2) * sqrt(-2 * log(rn1));
+  x[1] = sin(2 * M_PI * rn2) * sqrt(-2 * log(rn1));
+}
+
+/**
+ * NAME: boxAndMuller
+ *
+ * Simule une loi normale suivant la méthode de Box and Muller dans 20
+ * intervalles discrets entre -5 et 5.
+ *
+ * PARAMS:
+ * n - nombre de tirage à effectuer avec le generateur `genrand_boxAndMuller`
+ *
+ * OUTPUT:
+ * - affiche les effectifs trouvés pour les 20 intervalles discrets entre -5 et
+ *   5
+ */
+void boxAndMuller(int n) {
+  double x[2];
+  int testBins[20] = {0};
+  int i, j;
+  double borne;
+
+  for (i = 0;  i <= n; ++i) {
+    genrand_boxAndMuller(x);
+
+    j = 0;
+    for (borne = -5; borne < 5; borne += 0.5) { // place x1 et x2 dans `testBins`
+      if ((x[0] >= borne && x[0] < borne + 0.5)
+          || (x[1] >= borne && x[1] < borne + 0.5)) {
+        testBins[j]++;
       }
-    } else {
-      testBins[numberOfBins - 1]++;
+      ++j;
     }
+  }
+  // affichage
+  for (i = 0; i < 20; ++i) {
+    printf("%d\n", testBins[i]);
   }
 }
 
@@ -437,13 +544,28 @@ void testDistributionDiscreteABC() {
   statDistributionDiscreteABC(100000);
 }
 
+/**
+ * NAME: testDistributionDiscrete
+ *
+ *  Test de `statDistributionDiscrete` pour 100000 tirages.
+ *
+ * OUTPUT:
+ * - affiche les statistiques de `statDistributionDiscrete`
+ */
 void testDistributionDiscrete() {
   printf("discEmpDist2 - 100000\n");
   statDistributionDiscrete(100000);
 }
 
-/* On vérifie que la suite de nombre retournée par `negExp()` après un certain
- * nombre de tirage a bien un moyenne de 11.
+/**
+ * NAME: testExp
+ *
+ * On vérifie que la suite de nombre retournée par `negExp()` après un certain
+ * nombre de tirage a bien un moyenne de 11 environ.
+ *
+ * OUTPUT:
+ * - affiche la moyenne des suites de nombre aléatoires retournées par `negExp`
+ *   pour 1000 et 1000000 tirages.
  */
 void testExp() {
   double r;
@@ -455,38 +577,34 @@ void testExp() {
   printf("mean for 1000: %.10lf\n", (double)r / 1000);
 
   for (i = 0; i < 1000000; ++i) {
-    /* r += negExp(11); */
+    r += negExp(11);
   }
   printf("mean for 1000000: %.10lf\n", (double)r / 1000000);
 }
 
-/* Test du générateur `negExp()` en calculant des effectifs sur des intervalles
- * discrets de 0 à 22. Sachant que dernier case contiendra la fréquence
- * d'apparition des nombre plus grand que 22.
+/**
+ * NAME: testGaussian
+ *
+ * Test les fonction concernant la partie sur les générateur de loi
+ * irreverssibles.
+ *
+ * OUTPUT:
+ * - afficher de la moyenne d'une suite de valeurs retournées par
+ *   `genrand_gaussian`.
+ * - affiche les effectifs sur intervalles discrets pour une simulation de
+ *   courbe de Gauss
+ * - affiche les effectifs sur intervalles discrets suivant méthode de Box and
+ *   Muller.
  */
-void testDiscretisationNegExp(int n) {
-  int    test22bins[23] = {0};
-  int    i, j;
-  double r;
+void testGaussian() {
+  printf("Moyenne:\n");
+  printf("%lf\n", moyenneGaussienne(100000));
 
-  for (i = 0; i < n; ++i) {
-    r = negExp(11);
+  printf("Discretisation\n");
+  simulationCourbeGauss(1000000);
 
-    if (r < 22) {
-      // recherche de la position dans le tableau
-      for (j = 0; j < 22; ++j) {
-        if (r >= j && r < j + 1) {
-          test22bins[j]++;
-        }
-      }
-    } else {
-      test22bins[22]++;
-    }
-  }
-
-  for (i = 0; i < 23; ++i) {
-    printf("%d: %d\n", i + 1, test22bins[i]);
-  }
+  printf("Box and Muller\n");
+  boxAndMuller(1000000);
 }
 
 /******************************************************************************/
@@ -502,6 +620,8 @@ void myMain() {
   testExp();
   testDiscretisationNegExp(1000);
   testDiscretisationNegExp(1000000);
+
+  testGaussian();
 }
 
 /******************************************************************************/
