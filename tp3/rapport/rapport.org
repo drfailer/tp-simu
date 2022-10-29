@@ -1,0 +1,147 @@
+#+TITLE: TP3 - Simulation
+#+AUTHOR: Rémi CHASSAGNOL
+#+setupfile: ~/.emacs.d/emacs-config/org-setup-files/df-standard.org
+#+LATEX_HEADER: \usepackage{placeins}
+#+DATE: TODO
+#+OPTIONS: toc:nil title:nil
+
+#+begin_export latex
+\begin{titlepage}
+\begin{center}
+    
+    \textsc{\LARGE TP}\\[0.5cm]
+    
+    {\huge \bfseries Monte Carlo Simulation et intervalles de confiences\\[4cm]}
+
+      \centering
+      \includegraphics[scale=0.25]{./img/banner.png}
+
+      \vspace*{\fill}
+
+    \begin{minipage}{0.9\textwidth}
+      \begin{flushleft} \large
+        CHASSAGNOL Rémi\\
+        ZZ2 - F2 - promo24\\[2cm]
+      \end{flushleft}
+    \end{minipage}
+
+    \begin{minipage}{0.9\textwidth}
+      \begin{flushright} \large
+        \emph{Professeur:} HILL Davide\\
+      \end{flushright}
+    \end{minipage}
+
+    \textsc{TODO}
+
+  \end{center}
+\end{titlepage}
+
+\clearpage
+\tableofcontents
+\clearpage
+#+end_export
+
+* Simulation de $\pi$
+
+Le but de cette première partie est de déterminer une valeur approchée de $\pi$
+en utilisant une méthode de *Monte Carlo*. Le principe est le suivant:
+
+#+CAPTION: Simulation $\pi$ Monte Carlo
+[[./img/monteCarloPi.png]]
+[fn:: Figure 1: https://media.eduscol.education.fr/ftp_eduscol/2019/Ressources/Mathematiques/RA19_Lycee_G_1_MATH_Algorithmique_et_Programmation_activite_11.html]
+
+\FloatBarrier
+
+On tire deux nombres aléatoires $x$ et $y$, compris entre 0 et 1, à l'aide de
+*Mecene Twister*. C'est deux nombres sont les coordonnées d'un point appartenant
+un à espace représenté par un carré de coté 1.
+
+Ensuite, on teste si $x^{2} + y^{2} < 1$, si c'est le cas, cela signifie que le
+point trouvé se trouve dans le quart de cercle de rayon 1 situé à l’intérieur de
+notre carré comme ci-dessus. À la fin on fait le rapport du nombre de points
+trouvés dans le quart de cercle sur le nombre de points total et on obtient une
+valeur approchée de $\frac{\pi}{4}$. Là il suffit de multiplier par 4 pour
+trouver $\pi$.
+
+\clearpage
+
+Pour l'implémentation, on va utiliser =genrand_real1()= pour avoir des nombres
+aléatoire dans $[0;1]$ et on suit les étapes expliquées précédemment. La
+fonction prend en paramètre le nombre de points à générer. Comme Mercene
+Twister est un bon générateur qui explore bien l'espace, plus on génère de
+points, plus on couvre l'espace et ce de manière /"uniforme"/. De ce fait, plus on
+augmente le nombre de points générés, plus la précision augmente.
+
+#+BEGIN_SRC C
+double simPi(unsigned int nbPoints) {
+  unsigned int pointsInCircle = 0;
+  unsigned int i;
+  double       x, y;
+
+  for (i = 0; i < nbPoints; ++i) {
+    x = genrand_real1();
+    y = genrand_real1();
+
+    if (x * x + y * y < 1) {
+      pointsInCircle++;
+    }
+  }
+
+  return (double)(4 * pointsInCircle) / nbPoints;
+}
+#+END_SRC
+
+Voici le résultat pour différents nombres de générations:
+
+#+begin_example
+pi 1000: 3.124000
+pi 1000000: 3.144720
+pi 1000000000: 3.141541
+#+end_example
+
+On constate bien que plus on génère de points, plus on se rapproche de la valeur
+de $\pi$.
+
+* Calcul de précision
+
+Dans cette deuxième partie, on va réutiliser la fonction =simPi()= implémentée
+précédemment, et on va s’intéresser à la précision. Le but va être de calculer
+une moyenne sur un certain nombre de simulation de $\pi$. Pour chacune des
+moyennes, la simulation se fera avec différents nombres de points à
+générer. Ensuite, on compare la valeur de $\pi$ trouvée (en moyenne) avec =M_PI=
+qui est une macro de =math.h= qui contient une valeur précise de $\pi$.
+
+Notre fonction =simPiPrecisison()= va donc prendre deux paramètre:
+- le nombre de points à générer avec =simPi()=
+- le nombre d'expériences à effectuer pour le calcule de la moyenne
+
+
+La fonction affiche simplement le pourcentage de différence entre la valeur de
+$\pi$ simulée et =M_PI=.
+
+#+BEGIN_SRC C
+void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
+  int    i;
+  double mean;
+  double sum = 0;
+
+  initMT();
+
+  // calcul des pis
+  for (i = 0; i < nbSimulations; ++i) {
+    sum += simPi(nbPoints);
+  }
+  mean = sum / nbSimulations;
+
+  printf("mean: %lf\n", mean);
+  printf("precision: %lf\n", fabs(mean - M_PI) / M_PI);
+}
+#+END_SRC
+
+Voici les résultats pour des moyennes calculées sur 40 Simulations:
+
+| points générés |  moyenne | précision |
+|----------------+----------+-----------|
+|           1000 | 3.142400 |  0.000257 |
+|        1000000 | 3.141186 |  0.000129 |
+|     1000000000 |          |           |

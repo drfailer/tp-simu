@@ -55,12 +55,12 @@ double simPi(unsigned int nbPoints) {
  *
  * PARAMS:
  * nbPoints - nombre de points à calculer.
- * nbExperiements - nombre de simulation.
+ * nbSimulations - nombre de simulation.
  *
  * OUTPUT:
  * - affiche la précision
  */
-void simPiPrecisison(unsigned int nbPoints, int nbExperiments) {
+void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   int    i;
   double mean;
   double sum = 0;
@@ -68,10 +68,10 @@ void simPiPrecisison(unsigned int nbPoints, int nbExperiments) {
   initMT();
 
   // calcul des pis
-  for (i = 0; i < nbExperiments; ++i) {
+  for (i = 0; i < nbSimulations; ++i) {
     sum += simPi(nbPoints);
   }
-  mean = sum / nbExperiments;
+  mean = sum / nbSimulations;
 
   printf("mean: %lf\n", mean);
   printf("precision: %lf\n", fabs(mean - M_PI) / M_PI);
@@ -90,10 +90,10 @@ void simPiPrecisison(unsigned int nbPoints, int nbExperiments) {
  */
 void intervalleConfience(unsigned int nbPoints, int n) {
   int    i;
-  double pis[30] = {0}; // 100 experiments max
+  double pis[30] = {0};
   double mean;
   double sum = 0;
-  double sumSn = 0, sn;
+  double sumSn = 0, s2n;
   double tmp;
   double r;
 
@@ -111,9 +111,9 @@ void intervalleConfience(unsigned int nbPoints, int n) {
     tmp = pis[i] - mean;
     sumSn += tmp * tmp;
   }
-  sn = sumSn / (n - 1);
+  s2n = sumSn / (n - 1);
 
-  r = student[n - 1] * sqrt(sn / n);
+  r = student[n - 1] * sqrt(s2n / n);
 
   printf("intervalle de confience: [%lf; %lf].\n", mean - r, mean + r);
 }
@@ -121,13 +121,13 @@ void intervalleConfience(unsigned int nbPoints, int n) {
 int main(void) {
   initMT();
 
-  printf("pi 1000: %lf\n", simPi(1000));
-  printf("pi 1000000: %lf\n", simPi(1000000));
-  printf("pi 1000000000: %lf\n", simPi(1000000000));
+  /* printf("pi 1000: %lf\n", simPi(1000)); */
+  /* printf("pi 1000000: %lf\n", simPi(1000000)); */
+  /* printf("pi 1000000000: %lf\n", simPi(1000000000)); */
   simPiPrecisison(1000, 40);
   simPiPrecisison(1000000, 40);
   simPiPrecisison(1000000000, 40);
-  intervalleConfience(1000000, 30);
+  /* intervalleConfience(1000000, 30); */
 
   return 0;
 }
