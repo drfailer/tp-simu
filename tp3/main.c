@@ -80,7 +80,7 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
 }
 
 /**
- * NAME: intervalleConfience
+ * NAME: intervalleConfiance
  *
  * Calcul et affiche l'intervalle de confience à 95% pour pi. On ne peut faire
  * plus de 30 expériences avec cette fonction car on ne possède que les 30
@@ -93,7 +93,7 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
  * OUTPUT:
  * - affiche l'intervalle de confience.
  */
-void intervalleConfience(unsigned int nbPoints, int n) {
+void intervalleConfiance(unsigned int nbPoints, int n) {
   int    i;
   double pis[30] = {0};
   double mean;
@@ -120,19 +120,28 @@ void intervalleConfience(unsigned int nbPoints, int n) {
 
   r = student[n - 1] * sqrt(s2n / n);
 
-  printf("intervalle de confience: [%lf; %lf].\n", mean - r, mean + r);
+  printf("Pour %d echantillons et %d points.\n", n, nbPoints);
+  printf("taux d'erreur: %.10lf\n", r);
+  printf("intervalle de confience: [%.10lf; %.10lf].\n", mean - r, mean + r);
 }
 
 int main(void) {
   initMT();
 
-  printf("pi 1000: %lf\n", simPi(1000));
-  printf("pi 1000000: %lf\n", simPi(1000000));
+  // test `simPi`
+  /* printf("pi 1000: %lf\n", simPi(1000)); */
+  /* printf("pi 1000000: %lf\n", simPi(1000000)); */
   /* printf("pi 1000000000: %lf\n", simPi(1000000000)); */
-  simPiPrecisison(1000, 40);
-  simPiPrecisison(1000000, 40);
+
+  // test `simPiPrecisison`
+  /* simPiPrecisison(1000, 40); */
+  /* simPiPrecisison(1000000, 40); */
   /* simPiPrecisison(1000000000, 40); */
-  /* intervalleConfience(1000000, 30); */
+
+  // test `intervalleConfiance`
+  intervalleConfiance(1000, 30);
+  intervalleConfiance(1000000, 30);
+  intervalleConfiance(1000000000, 30);
 
   return 0;
 }

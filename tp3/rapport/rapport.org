@@ -116,7 +116,9 @@ Notre fonction =simPiPrecisison()= va donc prendre deux paramètre:
 - =nbSimulations=: le nombre d'expériences à effectuer pour le calcule de la moyenne
 
 La fonction affiche simplement le pourcentage de différence entre la valeur de
-$\pi$ simulée et =M_PI=.
+$\pi$ simulée et =M_PI=. A noter qu'on initialise bien *Mercene Twister* à chaque
+fois car on répète la même expérience, on ne change que le nombre de points
+générés par =simPi()=.
 
 #+BEGIN_SRC C
 void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
@@ -152,8 +154,63 @@ Dans cette dernier partie, on va écrire une fonction qui permet de calculer et
 d'afficher l'intervalle de confiance à 95% pour les moyennes simulées
 précédemment. Pour ce faire on commence par calculer la moyenne arithmétique
 $\overline{X}(n)$ sur un certain nombre de simulations de $\pi$. En même temps,
-on sauvegarde les valeurs de $\pi$ trouvées dans un tableau. Ensuite on utilise
-la moyennes et le tableaux de valeurs de $\pi$ pour calculer $S^{2}(n) =
-\frac{\sum_{i = 1}^{n}{X_{i} - \overline{X}(n)}}{n - 1}$, qui est un estimateur
-sans biais de la variance. Enfin on utilise une loi de Student pour calculer le
-taux d'erreur.
+on sauvegarde les valeurs de $\pi$ trouvées dans un tableau car on a besoin par
+la suite. Ensuite on utilise la moyennes et le tableaux de valeurs de $\pi$ pour
+calculer $S^{2}(n) = \frac{\sum_{i = 1}^{n}{(X_{i} - \overline{X}(n))^{2}}}{n -
+1}$, qui est un estimateur sans biais de la variance. Enfin on utilise une loi
+de Student pour calculer le taux d'erreur $R = t_{n-1,1 -
+\frac{\alpha}{2}}\times\sqrt{\frac{S^{2}(n)}{n}}$. En utilisant le taux
+d’erreurs trouvé, on peut calculer les bornes de l’intervalle de confiance à 95%
+$[\overline{X} - R, \overline{X} + R]$. \newline{}
+
+La fonction prend en entrée 2 paramètres, =nbPoints= (nombre de points à générer
+pour =simPi()=) et =n= (nombre d'expériences). On commence par générer =n= valeurs de
+$\pi$ et on stocke les résultats dans un tableau. Dans le même temps on calcule
+la somme des valeurs générées pour le calcul de la moyenne. Après avoir calculer
+la moyenne, on peux calculer l'estimateur =s2n=. Enfin on calcule R, sachant que
+les 30 premiers coefficients de Student sont stockés dans le tableau globale
+=student=. À la fin on affiche l'intervalle.
+
+#+BEGIN_SRC C
+void intervalleConfiance(unsigned int nbPoints, int n) {
+  int    i;
+  double pis[30] = {0};
+  double mean;
+  double sum = 0;
+  double sumSn = 0, s2n;
+  double tmp;
+  double r;
+
+  initMT();
+
+  // calcul des pis
+  for (i = 0; i < n; ++i) {
+    pis[i] = simPi(nbPoints);
+    sum += pis[i];
+  }
+  mean = sum / n; // calcul de la moyenne
+
+  // Calcul de S²(n)
+  for (i = 0; i < n; ++i) {
+    tmp = pis[i] - mean;
+    sumSn += tmp * tmp;
+  }
+  s2n = sumSn / (n - 1);
+
+  r = student[n - 1] * sqrt(s2n / n);
+
+  printf("intervalle de confience: [%lf; %lf].\n", mean - r, mean + r);
+}
+#+END_SRC
+
+On trouve les résultats suivant:
+
+- Pour *30* échantillons et *1000* points.
+    - taux d'erreur: ~0.016745~
+    - intervalle de confiance: ~[3.122988; 3.156479]~.
+- Pour *30* échantillons et *1000000* points.
+    - taux d'erreur: ~0.000651~
+    - intervalle de confiance: ~[3.140491; 3.141794]~.
+- Pour *30* échantillons et *1000000000* points.
+    - taux d'erreur: ~0.000019~
+    - intervalle de confiance: ~[3.141565; 3.141604]~.
