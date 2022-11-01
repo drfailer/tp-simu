@@ -58,7 +58,7 @@ double simPi(unsigned int nbPoints) {
  * nbSimulations - nombre de simulation.
  *
  * OUTPUT:
- * - affiche la précision
+ * - affiche: moyenne     précision (affichage exploitable sur tableur)
  */
 void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   int    i;
@@ -73,10 +73,25 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   }
   mean = sum / nbSimulations;
 
-  /* printf("mean: %lf\n", mean); */
-  /* printf("precision: %lf\n", fabs(mean - M_PI) / M_PI); */
   printf("%lf\t", mean);
   printf("%.10lf\n", fabs(mean - M_PI) / M_PI);
+}
+
+/**
+ * NAME: precision10_40
+ *
+ * PARAMS:
+ * nbPoints - nombre de points à générer pour la simulation de pi
+ *
+ * OUTPUT:
+ * - moyenne et précisions pour 10, 11, ..., 40 expériences
+ */
+void precision10_40(unsigned int nbPoints) {
+  int i;
+
+  for (i = 10; i <= 40; ++i) {
+    simPiPrecisison(nbPoints, i);
+  }
 }
 
 /**
@@ -138,10 +153,14 @@ int main(void) {
   /* simPiPrecisison(1000000, 40); */
   /* simPiPrecisison(1000000000, 40); */
 
+  // test `precision10_40`
+  /* precision10_40(1000000); */
+  precision10_40(1000000000);
+
   // test `intervalleConfiance`
-  intervalleConfiance(1000, 30);
-  intervalleConfiance(1000000, 30);
-  intervalleConfiance(1000000000, 30);
+  /* intervalleConfiance(1000, 30); */
+  /* intervalleConfiance(1000000, 30); */
+  /* intervalleConfiance(1000000000, 30); */
 
   return 0;
 }
