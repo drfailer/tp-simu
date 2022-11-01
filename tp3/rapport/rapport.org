@@ -139,7 +139,7 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
 }
 #+END_SRC
 
-Voici les résultats pour des moyennes calculées sur 40 Simulations:
+Voici les résultats pour des moyennes calculées sur 40 échantillons:
 
 | points générés |  moyenne | précision |
 |----------------+----------+-----------|
@@ -147,6 +147,19 @@ Voici les résultats pour des moyennes calculées sur 40 Simulations:
 |        1000000 | 3.141186 |  0.000129 |
 |     1000000000 | 3.141586 |  0.000002 |
 
+On calcule maintenant la précision pour $10, 11, ..., 39, 40$ échantillons et
+$1000000$ de points générés. Si on normalise les données obtenues (pour plus de
+lisibilité) et qu'on fait de la régression linéaire on obtient la droite
+suivante:
+
+#+CAPTION: Précision en fonction du nombre d'échantillons
+[[./img/precision_simu.png]]
+
+\FloatBarrier
+
+On voit bien que la droite ci dessus a une pente de $\frac{1}{2}$ ce qui montre
+bien que pour doubler la précision, il faut multiplier le nombre d'échantillons
+par 4.
 
 * Calcul d'intervalles de confiance à 95%
 
