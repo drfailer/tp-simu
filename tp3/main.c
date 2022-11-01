@@ -73,17 +73,22 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   }
   mean = sum / nbSimulations;
 
-  printf("mean: %lf\n", mean);
-  printf("precision: %lf\n", fabs(mean - M_PI) / M_PI);
+  /* printf("mean: %lf\n", mean); */
+  /* printf("precision: %lf\n", fabs(mean - M_PI) / M_PI); */
+  printf("%lf\t", mean);
+  printf("%.10lf\n", fabs(mean - M_PI) / M_PI);
 }
 
 /**
  * NAME: intervalleConfience
  *
- *  Calcul et affiche l'intervalle de confience à 95% pour pi.
+ * Calcul et affiche l'intervalle de confience à 95% pour pi. On ne peut faire
+ * plus de 30 expériences avec cette fonction car on ne possède que les 30
+ * premiers coefficients pour la loi de student (voir 'VARIABLES GLOBALES').
  *
  * PARAMS:
  * nbPoints - precision de la simulation de pi.
+ * n - nombre de pi à calculer pour la moyenne
  *
  * OUTPUT:
  * - affiche l'intervalle de confience.
@@ -121,12 +126,12 @@ void intervalleConfience(unsigned int nbPoints, int n) {
 int main(void) {
   initMT();
 
-  /* printf("pi 1000: %lf\n", simPi(1000)); */
-  /* printf("pi 1000000: %lf\n", simPi(1000000)); */
+  printf("pi 1000: %lf\n", simPi(1000));
+  printf("pi 1000000: %lf\n", simPi(1000000));
   /* printf("pi 1000000000: %lf\n", simPi(1000000000)); */
   simPiPrecisison(1000, 40);
   simPiPrecisison(1000000, 40);
-  simPiPrecisison(1000000000, 40);
+  /* simPiPrecisison(1000000000, 40); */
   /* intervalleConfience(1000000, 30); */
 
   return 0;

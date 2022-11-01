@@ -5,33 +5,32 @@
 #+DATE: TODO
 #+OPTIONS: toc:nil title:nil
 
+#+LATEX_HEADER: \usepackage{multicol}
 #+begin_export latex
 \begin{titlepage}
 \begin{center}
     
     \textsc{\LARGE TP}\\[0.5cm]
     
-    {\huge \bfseries Monte Carlo Simulation et intervalles de confiences\\[4cm]}
+    {\huge \bfseries Monte Carlo Simulation et intervalles de confiences\\[2cm]}
 
       \centering
       \includegraphics[scale=0.25]{./img/banner.png}
 
       \vspace*{\fill}
 
-    \begin{minipage}{0.9\textwidth}
-      \begin{flushleft} \large
-        CHASSAGNOL Rémi\\
-        ZZ2 - F2 - promo24\\[2cm]
-      \end{flushleft}
-    \end{minipage}
+    \begin{multicols}{2}
+      \large
+      CHASSAGNOL Rémi\\
+      ZZ2 - F2 - promo24\\[2cm]
 
-    \begin{minipage}{0.9\textwidth}
-      \begin{flushright} \large
-        \emph{Professeur:} HILL Davide\\
-      \end{flushright}
-    \end{minipage}
+      \columnbreak
 
-    \textsc{TODO}
+      \large
+      \emph{Professeur:} HILL Davide\\
+    \end{multicols}
+
+    \textsc{7 octobre 2022}
 
   \end{center}
 \end{titlepage}
@@ -93,11 +92,11 @@ double simPi(unsigned int nbPoints) {
 
 Voici le résultat pour différents nombres de générations:
 
-#+begin_example
-pi 1000: 3.124000
-pi 1000000: 3.144720
-pi 1000000000: 3.141541
-#+end_example
+| points générés | valeur de \pi trouvée |
+|----------------+-----------------------|
+|           1000 |              3.124000 |
+|        1000000 |              3.144720 |
+|     1000000000 |              3.141541 |
 
 On constate bien que plus on génère de points, plus on se rapproche de la valeur
 de $\pi$.
@@ -109,12 +108,12 @@ précédemment, et on va s’intéresser à la précision. Le but va être de ca
 une moyenne sur un certain nombre de simulation de $\pi$. Pour chacune des
 moyennes, la simulation se fera avec différents nombres de points à
 générer. Ensuite, on compare la valeur de $\pi$ trouvée (en moyenne) avec =M_PI=
-qui est une macro de =math.h= qui contient une valeur précise de $\pi$.
+qui est une macro de =math.h= qui contient une valeur relativement précise de
+$\pi$. \newline{}
 
 Notre fonction =simPiPrecisison()= va donc prendre deux paramètre:
-- le nombre de points à générer avec =simPi()=
-- le nombre d'expériences à effectuer pour le calcule de la moyenne
-
+- =nbPoints=: le nombre de points à générer avec =simPi()=
+- =nbSimulations=: le nombre d'expériences à effectuer pour le calcule de la moyenne
 
 La fonction affiche simplement le pourcentage de différence entre la valeur de
 $\pi$ simulée et =M_PI=.
@@ -144,4 +143,17 @@ Voici les résultats pour des moyennes calculées sur 40 Simulations:
 |----------------+----------+-----------|
 |           1000 | 3.142400 |  0.000257 |
 |        1000000 | 3.141186 |  0.000129 |
-|     1000000000 |          |           |
+|     1000000000 | 3.141586 |  0.000002 |
+
+
+* Calcul d'intervalles de confiance à 95%
+
+Dans cette dernier partie, on va écrire une fonction qui permet de calculer et
+d'afficher l'intervalle de confiance à 95% pour les moyennes simulées
+précédemment. Pour ce faire on commence par calculer la moyenne arithmétique
+$\overline{X}(n)$ sur un certain nombre de simulations de $\pi$. En même temps,
+on sauvegarde les valeurs de $\pi$ trouvées dans un tableau. Ensuite on utilise
+la moyennes et le tableaux de valeurs de $\pi$ pour calculer $S^{2}(n) =
+\frac{\sum_{i = 1}^{n}{X_{i} - \overline{X}(n)}}{n - 1}$, qui est un estimateur
+sans biais de la variance. Enfin on utilise une loi de Student pour calculer le
+taux d'erreur.
