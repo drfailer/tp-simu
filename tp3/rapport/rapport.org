@@ -71,6 +71,7 @@ Twister est un bon générateur qui explore bien l'espace, plus on génère de
 points, plus on couvre l'espace et ce de manière /"uniforme"/. De ce fait, plus on
 augmente le nombre de points générés, plus la précision augmente.
 
+#+CAPTION: fonction de simulation de $\pi$ avec Monte Carlo.
 #+BEGIN_SRC C
 double simPi(unsigned int nbPoints) {
   unsigned int pointsInCircle = 0;
@@ -122,6 +123,7 @@ $\pi$ simulée et =M_PI=. A noter qu'on initialise bien *Mercene Twister* à cha
 fois car on souhaite répéter la même expérience, on ne change que le nombre de
 points générés par =simPi()=.
 
+#+CAPTION: fonction d'affichage de l'erreur.
 #+BEGIN_SRC C
 void simPiErreur(unsigned int nbPoints, int nbSimulations) {
   int    i;
@@ -189,6 +191,7 @@ les 30 premiers coefficients de Student sont stockés dans le tableau globale
 
 \clearpage
 
+#+CAPTION: fonction d'affichage de l'intervalle de confiance.
 #+BEGIN_SRC C
 void intervalleConfiance(unsigned int nbPoints, int n) {
   int    i;
