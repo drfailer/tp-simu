@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wuninitialized -O2
+CFLAGS = -Wall -Wextra -Wuninitialized -g
 LDFLAGS = -lm
 
 prog: main.c mt19937ar.c
