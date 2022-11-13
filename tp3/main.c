@@ -22,7 +22,7 @@ static const double student[31] = {
 /**
  * NAME: simPi
  *
- * Calcule une valeur approchée de pi à l'aide de la methode de Monte Carlo.
+ * Calcule une valeur approchée de pi à l'aide de la méthode de Monte Carlo.
  *
  * PARAMS:
  * nbPoints - nombre de points à calculer
@@ -50,17 +50,17 @@ double simPi(unsigned int nbPoints) {
 /**
  * NAME: simPiPrecisison
  *
- *  Effectue plusieur simulation avec `simPi` et `nbPoints`, puis calcule la
- * moyenne et la précision sur pi.
+ * Effectue plusieurs simulation avec `simPi` et `nbPoints`, puis calcule la
+ * moyenne et l'erreur sur pi.
  *
  * PARAMS:
  * nbPoints - nombre de points à calculer.
  * nbSimulations - nombre de simulation.
  *
  * OUTPUT:
- * - affiche la précision
+ * - affiche: moyenne     erreur (affichage exploitable sur tableur)
  */
-void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
+void simPiErreur(unsigned int nbPoints, int nbSimulations) {
   int    i;
   double mean;
   double sum = 0;
@@ -73,22 +73,42 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   }
   mean = sum / nbSimulations;
 
-  printf("mean: %lf\n", mean);
-  printf("precision: %lf\n", fabs(mean - M_PI) / M_PI);
+  printf("%lf\t", mean);
+  printf("%.10lf\n", fabs(mean - M_PI) / M_PI);
 }
 
 /**
- * NAME: intervalleConfience
- *
- *  Calcul et affiche l'intervalle de confience à 95% pour pi.
+ * NAME: precision10_40
  *
  * PARAMS:
- * nbPoints - precision de la simulation de pi.
+ * nbPoints - nombre de points à générer pour la simulation de pi
  *
  * OUTPUT:
- * - affiche l'intervalle de confience.
+ * - moyenne et précisions pour 10, 11, ..., 40 expériences
  */
-void intervalleConfience(unsigned int nbPoints, int n) {
+void erreur10_40(unsigned int nbPoints) {
+  int i;
+
+  for (i = 10; i <= 40; ++i) {
+    simPiErreur(nbPoints, i);
+  }
+}
+
+/**
+ * NAME: intervalleConfiance
+ *
+ * Calcul et affiche l'intervalle de confiance à 95% pour pi. On ne peut faire
+ * plus de 30 expériences avec cette fonction car on ne possède que les 30
+ * premiers coefficients pour la loi de Student (voir 'VARIABLES GLOBALES').
+ *
+ * PARAMS:
+ * nbPoints - précision de la simulation de pi.
+ * n - nombre de pi à calculer pour la moyenne
+ *
+ * OUTPUT:
+ * - affiche l'intervalle de confiance.
+ */
+void intervalleConfiance(unsigned int nbPoints, int n) {
   int    i;
   double pis[30] = {0};
   double mean;
@@ -115,19 +135,35 @@ void intervalleConfience(unsigned int nbPoints, int n) {
 
   r = student[n - 1] * sqrt(s2n / n);
 
-  printf("intervalle de confience: [%lf; %lf].\n", mean - r, mean + r);
+  printf("Pour %d echantillons et %d points.\n", n, nbPoints);
+  printf("taux d'erreur: %.10lf\n", r);
+  printf("intervalle de confience: [%.10lf; %.10lf].\n", mean - r, mean + r);
 }
 
 int main(void) {
   initMT();
 
-  /* printf("pi 1000: %lf\n", simPi(1000)); */
-  /* printf("pi 1000000: %lf\n", simPi(1000000)); */
+  // test `simPi`
+  printf("pi 1000: %lf\n", simPi(1000));
+  printf("pi 1000000: %lf\n", simPi(1000000));
   /* printf("pi 1000000000: %lf\n", simPi(1000000000)); */
-  simPiPrecisison(1000, 40);
-  simPiPrecisison(1000000, 40);
-  simPiPrecisison(1000000000, 40);
-  /* intervalleConfience(1000000, 30); */
+
+  // test `simPiPrecisison`
+  printf("\n=== Précision ===\n");
+  simPiErreur(1000, 40);
+  simPiErreur(1000000, 40);
+  simPiErreur(1000000000, 40);
+
+  // test `precision10_40`
+  printf("\n=== Précision pour 10 à 40 expériences ===\n");
+  erreur10_40(1000000);
+  /* erreur10_40(1000000000); */
+
+  // test `intervalleConfiance`
+  printf("\n=== Intervalle de confiences ===\n");
+  intervalleConfiance(1000, 30);
+  intervalleConfiance(1000000, 30);
+  /* intervalleConfiance(1000000000, 30); */
 
   return 0;
 }

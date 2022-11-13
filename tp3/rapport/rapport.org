@@ -4,34 +4,40 @@
 #+LATEX_HEADER: \usepackage{placeins}
 #+DATE: TODO
 #+OPTIONS: toc:nil title:nil
+#+LATEX_HEADER: \usepackage{fancyhdr}
+#+LATEX_HEADER: \pagestyle{fancy}
+#+LATEX_HEADER: \renewcommand\headrulewidth{1pt}
+#+LATEX_HEADER: \renewcommand\footrulewidth{1pt}
+#+LATEX_HEADER: \fancyhead[L]{\bfseries TP Simulation}
+#+LATEX_HEADER: \fancyfoot[L]{CHASSAGNOL Rémi}
+#+LATEX_HEADER: \fancyfoot[R]{\today}
 
+#+LATEX_HEADER: \usepackage{multicol}
 #+begin_export latex
 \begin{titlepage}
 \begin{center}
     
     \textsc{\LARGE TP}\\[0.5cm]
     
-    {\huge \bfseries Monte Carlo Simulation et intervalles de confiences\\[4cm]}
+    {\huge \bfseries Monte Carlo Simulation et intervalles de confiance\\[2cm]}
 
       \centering
       \includegraphics[scale=0.25]{./img/banner.png}
 
       \vspace*{\fill}
 
-    \begin{minipage}{0.9\textwidth}
-      \begin{flushleft} \large
-        CHASSAGNOL Rémi\\
-        ZZ2 - F2 - promo24\\[2cm]
-      \end{flushleft}
-    \end{minipage}
+    \begin{multicols}{2}
+      \large
+      CHASSAGNOL Rémi\\
+      ZZ2 - F2 - promo24\\[2cm]
 
-    \begin{minipage}{0.9\textwidth}
-      \begin{flushright} \large
-        \emph{Professeur:} HILL Davide\\
-      \end{flushright}
-    \end{minipage}
+      \columnbreak
 
-    \textsc{TODO}
+      \large
+      \emph{Professeur:} HILL David\\
+    \end{multicols}
+
+    \textsc{\today}
 
   \end{center}
 \end{titlepage}
@@ -53,8 +59,8 @@ en utilisant une méthode de *Monte Carlo*. Le principe est le suivant:
 \FloatBarrier
 
 On tire deux nombres aléatoires $x$ et $y$, compris entre 0 et 1, à l'aide de
-*Mecene Twister*. C'est deux nombres sont les coordonnées d'un point appartenant
-un à espace représenté par un carré de coté 1.
+*Mecene Twister*. Ces deux nombres sont les coordonnées d'un point appartenant
+à un espace représenté par un carré de côté 1.
 
 Ensuite, on teste si $x^{2} + y^{2} < 1$, si c'est le cas, cela signifie que le
 point trouvé se trouve dans le quart de cercle de rayon 1 situé à l’intérieur de
@@ -66,12 +72,13 @@ trouver $\pi$.
 \clearpage
 
 Pour l'implémentation, on va utiliser =genrand_real1()= pour avoir des nombres
-aléatoire dans $[0;1]$ et on suit les étapes expliquées précédemment. La
+aléatoires dans $[0;1]$ et on suit les étapes expliquées précédemment. La
 fonction prend en paramètre le nombre de points à générer. Comme Mercene
 Twister est un bon générateur qui explore bien l'espace, plus on génère de
 points, plus on couvre l'espace et ce de manière /"uniforme"/. De ce fait, plus on
 augmente le nombre de points générés, plus la précision augmente.
 
+#+CAPTION: fonction de simulation de $\pi$ avec Monte Carlo.
 #+BEGIN_SRC C
 double simPi(unsigned int nbPoints) {
   unsigned int pointsInCircle = 0;
@@ -93,14 +100,16 @@ double simPi(unsigned int nbPoints) {
 
 Voici le résultat pour différents nombres de générations:
 
-#+begin_example
-pi 1000: 3.124000
-pi 1000000: 3.144720
-pi 1000000000: 3.141541
-#+end_example
+| points générés | valeur de \pi trouvée |
+|----------------+-----------------------|
+|           1000 |              3.124000 |
+|        1000000 |              3.144720 |
+|     1000000000 |              3.141541 |
 
 On constate bien que plus on génère de points, plus on se rapproche de la valeur
 de $\pi$.
+
+\clearpage
 
 * Calcul de précision
 
@@ -109,18 +118,21 @@ précédemment, et on va s’intéresser à la précision. Le but va être de ca
 une moyenne sur un certain nombre de simulation de $\pi$. Pour chacune des
 moyennes, la simulation se fera avec différents nombres de points à
 générer. Ensuite, on compare la valeur de $\pi$ trouvée (en moyenne) avec =M_PI=
-qui est une macro de =math.h= qui contient une valeur précise de $\pi$.
+qui est une macro de =math.h= qui contient une valeur relativement précise de
+$\pi$. \newline{}
 
-Notre fonction =simPiPrecisison()= va donc prendre deux paramètre:
-- le nombre de points à générer avec =simPi()=
-- le nombre d'expériences à effectuer pour le calcule de la moyenne
-
+Notre fonction =simPiPrecisison()= va donc prendre deux paramètres:
+- =nbPoints=: le nombre de points à générer avec =simPi()=
+- =nbSimulations=: le nombre d'expériences à effectuer pour le calcul de la moyenne
 
 La fonction affiche simplement le pourcentage de différence entre la valeur de
-$\pi$ simulée et =M_PI=.
+$\pi$ simulée et =M_PI=. A noter qu'on initialise bien *Mercene Twister* à chaque
+fois car on souhaite répéter la même expérience, on ne change que le nombre de
+points générés par =simPi()=.
 
+#+CAPTION: fonction d'affichage de l'erreur.
 #+BEGIN_SRC C
-void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
+void simPiErreur(unsigned int nbPoints, int nbSimulations) {
   int    i;
   double mean;
   double sum = 0;
@@ -133,15 +145,105 @@ void simPiPrecisison(unsigned int nbPoints, int nbSimulations) {
   }
   mean = sum / nbSimulations;
 
-  printf("mean: %lf\n", mean);
-  printf("precision: %lf\n", fabs(mean - M_PI) / M_PI);
+  printf("%lf\t", mean);
+  printf("%.10lf\n", fabs(mean - M_PI) / M_PI);
 }
 #+END_SRC
 
-Voici les résultats pour des moyennes calculées sur 40 Simulations:
+Voici les résultats pour des moyennes calculées sur 40 échantillons, on constate
+à nouveau que plus on génère de points plus la précision augmente.
 
-| points générés |  moyenne | précision |
-|----------------+----------+-----------|
-|           1000 | 3.142400 |  0.000257 |
-|        1000000 | 3.141186 |  0.000129 |
-|     1000000000 |          |           |
+| points générés |  moyenne |   erreur |
+|----------------+----------+----------|
+|           1000 | 3.142400 | 0.000257 |
+|        1000000 | 3.141186 | 0.000129 |
+|     1000000000 | 3.141586 | 0.000002 |
+
+On calcule maintenant l'erreur pour $\textbf{10, 11, ..., 39, 40}$ échantillons
+et $\textbf{1 000 000 000}$ points générés. Si on normalise les données obtenues
+(pour plus de lisibilité) et qu'on fait de la régression linéaire on obtient la
+droite suivante:
+
+#+CAPTION: Erreur en fonction du nombre d'échantillons
+[[./img/simu-precision.png]]
+
+\FloatBarrier
+
+On voit bien que la droite ci-dessus a une pente de presque $-\frac{1}{2}$ ce
+qui montre bien que pour doubler la précision (diviser l'erreur par 2), il faut
+multiplier le nombre d'échantillons par 4.
+
+* Calcul d'intervalles de confiance à 95%
+
+Dans cette dernier partie, on va écrire une fonction qui permet de calculer et
+d'afficher l'intervalle de confiance à 95% pour les moyennes simulées
+précédemment. Pour ce faire on commence par calculer la moyenne arithmétique
+$\overline{X}(n)$ sur un certain nombre de simulations de $\pi$. En même temps,
+on sauvegarde les valeurs de $\pi$ trouvées dans un tableau car on en aura
+besoin par la suite. Ensuite on utilise la moyenne et le tableau de valeurs de
+$\pi$ pour calculer $S^{2}(n) = \frac{\sum_{i = 1}^{n}{(X_{i} -
+\overline{X}(n))^{2}}}{n - 1}$, qui est un estimateur sans biais de la
+variance. Enfin on utilise une loi de Student pour calculer le taux d'erreur $R
+= t_{n-1,1 - \frac{\alpha}{2}}\times\sqrt{\frac{S^{2}(n)}{n}}$. En utilisant le
+taux d'erreur trouvé, on peut calculer les bornes de l’intervalle de confiance
+à 95% $[\overline{X} - R, \overline{X} + R]$. \newline{}
+
+La fonction prend en entrée 2 paramètres, =nbPoints= (nombre de points à générer
+pour =simPi()=) et =n= (nombre d'expériences). On commence par générer =n= valeurs de
+$\pi$ et on stocke les résultats dans un tableau. Dans le même temps on calcule
+la somme des valeurs générées pour le calcul de la moyenne. Après avoir calculé
+la moyenne, on peut calculer l'estimateur =s2n=. Enfin on calcule R, sachant que
+les 30 premiers coefficients de Student sont stockés dans le tableau global
+=student=. À la fin on affiche l'intervalle.
+
+\clearpage
+
+#+CAPTION: fonction d'affichage de l'intervalle de confiance.
+#+BEGIN_SRC C
+void intervalleConfiance(unsigned int nbPoints, int n) {
+  int    i;
+  double pis[30] = {0};
+  double mean;
+  double sum = 0;
+  double sumSn = 0, s2n;
+  double tmp;
+  double r;
+
+  initMT();
+
+  // calcul des pis
+  for (i = 0; i < n; ++i) {
+    pis[i] = simPi(nbPoints);
+    sum += pis[i];
+  }
+  mean = sum / n; // calcul de la moyenne
+
+  // Calcul de S²(n)
+  for (i = 0; i < n; ++i) {
+    tmp = pis[i] - mean;
+    sumSn += tmp * tmp;
+  }
+  s2n = sumSn / (n - 1);
+
+  r = student[n - 1] * sqrt(s2n / n);
+
+  printf("intervalle de confiance: [%lf; %lf].\n", mean - r, mean + r);
+}
+#+END_SRC
+
+On trouve les résultats suivant:
+
+- Pour *30* échantillons et *1 000* points.
+    - taux d'erreur: ~0.016745~
+    - intervalle de confiance: ~[3.122988; 3.156479]~.
+- Pour *30* échantillons et *1 000 000* points.
+    - taux d'erreur: ~0.000651~
+    - intervalle de confiance: ~[3.140491; 3.141794]~.
+- Pour *30* échantillons et *1 000 000 000* points.
+    - taux d'erreur: ~0.000019~
+    - intervalle de confiance: ~[3.141565; 3.141604]~.
+
+
+Ces résultats sont cohérents par rapport au cours, on constate que plus on
+utilise de points pour générer $\pi$ plus la variance est faible et donc plus
+l'intervalle de confiance est petit.
