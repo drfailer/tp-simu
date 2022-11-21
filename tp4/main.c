@@ -31,12 +31,11 @@ void modelFib(int n) {
     }
 }
 
-int nbSurvivants(int age, int nbLapins) {
-  int survivants = 0;
-  int i;
+int nbSurvivants(int age, unsigned long int nbLapins) {
+  unsigned long int nbSurvivants = 0;
+  unsigned long int i;
   double probaSurvie = 0.6;
 
-  initMT();
   if (age >= 10) // la proba de survie diminue de 10%/ans au dela de 10 ans
     probaSurvie = 0.6 - 0.1 * (age - 10);
   else if (age == 0) // proba de survie pour les petits
@@ -44,13 +43,16 @@ int nbSurvivants(int age, int nbLapins) {
 
   for (i = 0; i < nbLapins; ++i) {
     if (genrand_real1() < probaSurvie) {
-      survivants++;
+      nbSurvivants++;
     }
   }
-  return survivants;
+
+/* printf("age: %d, nb lapins: %ld, nbSurvivants: %ld\n", age, nbLapins, nbSurvivants); */
+
+  return nbSurvivants;
 }
 
-int nbPortees() {
+int calculNbPortees() {
   int nbPortees = 8;
   int r = genrand_real1();
 
@@ -71,25 +73,22 @@ int nbPortees() {
 }
 
 void calculNaissance(data_t * populations, int annee) {
-  int i, j, k;
-  int portees, petits;
-  int males;
+  unsigned long i;
+  int j, k;
+  int nbPortees, nbPetits;
+  int estMale;
 
-  initMT();
-  for (i = 0; i < populations[annee - 1].f; ++i) { // TODO: faire un calcul pour
-                                                   // avoir assez de mâles
-    portees = nbPortees();
+  for (i = 0; i < populations[annee - 1].f; ++i) {
+    nbPortees = calculNbPortees();
 
-    for (j = 0; j < portees; ++j) {
-      petits = genrand_int32()%3 + 3;
-      for (k = 0; k < petits; ++k) {
-        males = genrand_int32()%2;
-        if (males) {
-          // TODO
-          populations[annee].nbPetitsM++;
+    for (j = 0; j < nbPortees; ++j) {
+      nbPetits = genrand_int32()%4 + 3;
+      for (k = 0; k < nbPetits; ++k) {
+        estMale = genrand_int32()%2;
+        if (estMale) {
+          populations[annee].nbM[0]++;
         } else {
-          // TODO
-          populations[annee].nbPetitsF++;
+          populations[annee].nbF[0]++;
         }
       }
     }
@@ -102,17 +101,13 @@ void calculNouvelleAnnee(data_t *populations, int annee) {
   int nombreM = 0;
 
   // calcul des survivants chez les adultes
-  for (i = 13; i >= 0; --i) {
-    populations[annee].nbM[i] = nbSurvivants(i + 1, populations[annee - 1].nbM[i - 1]);
-    populations[annee].nbF[i] = nbSurvivants(i + 1, populations[annee - 1].nbF[i - 1]);
+  for (i = 14; i >= 1; --i) {
+    populations[annee].nbM[i] = nbSurvivants(i - 1, populations[annee - 1].nbM[i - 1]);
+    populations[annee].nbF[i] = nbSurvivants(i - 1, populations[annee - 1].nbF[i - 1]);
   }
-  // calcul des survivants chez les petits
-  populations[annee].nbM[0] = nbSurvivants(0, populations[annee - 1].nbPetitsM);
-  populations[annee].nbF[0] = nbSurvivants(0, populations[annee - 1].nbPetitsF);
-
   // les petits deviennent adultes
-  populations[annee].nbPetitsM = 0;
-  populations[annee].nbPetitsF = 0;
+  populations[annee].nbF[0] = 0;
+  populations[annee].nbM[0] = 0;
 
   // calcul des naissances
   // TODO: optimize this (put it in the loop above)
@@ -136,14 +131,14 @@ data_t* initPopulations(int n) {
     exit(1);
   }
 
-  populations[0].nbF[0] = NB_F_DEP;
-  populations[0].nbM[0] = NB_M_DEP;
-  populations[0].nbPetitsF = 0;
-  populations[0].nbPetitsM = 0;
-  for (i = 1; i < 14; ++i) {
+  for (i = 0; i < 14; ++i) {
     populations[0].nbF[i] = 0;
     populations[0].nbM[i] = 0;
   }
+  populations[0].nbF[1] = NB_F_DEP;
+  populations[0].nbM[1] = NB_M_DEP;
+  populations[0].f = NB_F_DEP;
+  populations[0].m = NB_M_DEP;
 
   return populations;
 }
@@ -166,22 +161,22 @@ void affichePopulation(data_t *population, int annee) {
   printf("\n\n===========================\n");
   printf("Population annee %d:\n", annee);
 
-  printf("\nNombre de femelles: %d\n", population[annee].f);
-  printf("Nombre de mâles: %d\n", population[annee].m);
+  printf("\nNombre de femelles: %ld\n", population[annee].f);
+  printf("Nombre de mâles: %ld\n", population[annee].m);
 
 
   printf("\nFemelles adultes:\n");
   for (i = 0; i < 14; ++i) {
-    printf("agée de %d ans: %d\n", i + 1, population[annee].nbF[i]);
+    printf("agée de %d ans: %ld\n", i + 1, population[annee].nbF[i]);
   }
 
   printf("\nMâles adultes:\n");
   for (i = 0; i < 14; ++i) {
-    printf("agé de %d ans: %d\n", i + 1, population[annee].nbM[i]);
+    printf("agé de %d ans: %ld\n", i + 1, population[annee].nbM[i]);
   }
 
-  printf("\nNombre de petites femelles: %d\n", population[annee].nbPetitsF);
-  printf("Nombre de petits mâles: %d\n", population[annee].nbPetitsM);
+  printf("\nNombre de petites femelles: %ld\n", population[annee].nbF[0]);
+  printf("Nombre de petits mâles: %ld\n", population[annee].nbM[0]);
 }
 
 /**
@@ -206,9 +201,10 @@ void afficheLapinAn(int n) {
   data_t *population = computeNbLapins(n);
 
   for (annee = 0; annee < n; ++annee) {
+    printf("annee %d: ", annee + 1);
+    afficheData("adultes: %nbf %nbm, petits: %pf %pm, total: %t\n", population[annee]);
     /* affichePopulation(population, annee); */
     /* afficheData("%nbm\n", population[annee]); */
-    /* afficheData("%nbf %nbm %pf %pm\n", population[annee]); */
     /* afficheData("males min %m[1] mal max %m[14]\n", population[annee]); */
     /* afficheData("femeles ages min: %f[2]\nfemelles age max: %f[14]\n\n", population[annee]); */
   }
@@ -217,9 +213,12 @@ void afficheLapinAn(int n) {
 int main(void)
 {
   /* Model de Fibonacci: */
-  /* modelFib(5); */
+  /* modelFib(20); */
 
   /* Model réaliste: */
-  afficheLapinAn(10);
+  initMT();
+  /* for (int i = 0; i < 10; ++i){ */
+    afficheLapinAn(20);
+  /* } */
   return 0;
 }

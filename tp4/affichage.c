@@ -63,6 +63,9 @@ int parseFormat(char *str) {
   else if (strncmp(str, "%pm", 3) == 0) { // nombre de petits mâles
     output = 5;
   }
+  else if (strncmp(str, "%t", 2) == 0) { // nombre de petits mâles
+    output = 6;
+  }
 
   return output;
 }
@@ -93,28 +96,33 @@ void afficheData(char *format, data_t population) {
   while (*e != 0) {
     switch (parseFormat(e)) {
       case 0:
-        printf("%d", population.f);
+        printf("%ld", population.f);
         e += 4;
         break;
       case 1:
-        printf("%d", population.m);
+        printf("%ld", population.m);
         e += 4;
         break;
       case 2:
         e = parseAge(e + 3, &age);
-        printf("%d", population.nbF[age - 1]);
+        printf("%ld", population.nbF[age]);
         break;
       case 3:
         e = parseAge(e + 3, &age);
-        printf("%d", population.nbM[age - 1]);
+        printf("%ld", population.nbM[age]);
         break;
       case 4:
-        printf("%d", population.nbPetitsF);
+        printf("%ld", population.nbF[0]);
         e += 3;
         break;
       case 5:
-        printf("%d", population.nbPetitsM);
+        printf("%ld", population.nbM[0]);
         e += 3;
+        break;
+      case 6:
+        printf("%ld", population.nbM[0] + population.nbM[0] + population.f
+            + population.m);
+        e += 2;
         break;
       default:
         printf("%c", *e);

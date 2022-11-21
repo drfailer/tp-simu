@@ -5,12 +5,10 @@
 
 /* Permet de stocker des statistiques sur la population de lapins chaque années */
 typedef struct data {
-  int nbF[14];   // nombre de femelles de 1 à 14 ans
-  int nbM[14];   // nombre de mâles de 1 à 14 ans
-  int nbPetitsF; // nombre de petites femelles (lapin de moins de 1 an)
-  int nbPetitsM; // nombre de petits mâles
-  int f;         // nombre de femelles
-  int m;         // nombre de mâles
+  unsigned long int nbF[15];   // nombre de femelles de 0 à 14 ans
+  unsigned long int nbM[15];   // nombre de mâles de 0 à 14 ans
+  unsigned long int f;         // nombre de femelles
+  unsigned long int m;         // nombre de mâles
 } data_t;
 
 #endif
