@@ -63,7 +63,7 @@ int parseFormat(char *str) {
   else if (strncmp(str, "%pm", 3) == 0) { // nombre de petits mâles
     output = 5;
   }
-  else if (strncmp(str, "%t", 2) == 0) { // nombre de petits mâles
+  else if (strncmp(str, "%t", 2) == 0) { // total
     output = 6;
   }
 

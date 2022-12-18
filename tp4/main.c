@@ -6,18 +6,26 @@
 #define NB_M_DEP 2 // nombre de mâles au départ
 #define NB_F_DEP 2 // nombre de femelles au départ
 
-/* FONCTIONS: */
+/******************************************************************************/
+/*                           FONCTIONS UTILITAIRES                            */
+/******************************************************************************/
+
+static inline unsigned long minLapins(unsigned long a, unsigned long b) {
+  int c = a;
+  if (a < b)
+    c = b;
+  return c;
+}
+
+/******************************************************************************/
+/*                                 FIBONACCI                                  */
+/******************************************************************************/
 
 /**
- * NAME: function name
+ * @brief  Simule le nombre de lapins chaque années en utilisant le modèle de
+ *         Fibonacci.
  *
- * Model non réaliste de Fibonacci.
- *
- * PARAMS:
- * n - nombre de mois à traiter
- *
- * OUTPUT:
- * - affiche le nombre de lapins sur `n` mois
+ * @param  n  nombre d'années à simuler.
  */
 void modelFib(int n) {
   int i;
@@ -31,6 +39,19 @@ void modelFib(int n) {
     }
 }
 
+/******************************************************************************/
+/*                              MODÈLE RÉALISTE                               */
+/******************************************************************************/
+
+/**
+ * @brief  Calcul à partir d'un nombre de lapins `nbLapins` agés de `age` à
+ *         l'année N - 1 le nombre de survivants pour l'année N.
+ *
+ * @param  age       Age des lapins.
+ * @param  nbLapins  Nombre de lapin l'année précedente.
+ *
+ * @return  Nombre de lapins survivants à la fin de l'année.
+ */
 int nbSurvivants(int age, unsigned long int nbLapins) {
   unsigned long int nbSurvivants = 0;
   unsigned long int i;
@@ -47,11 +68,15 @@ int nbSurvivants(int age, unsigned long int nbLapins) {
     }
   }
 
-/* printf("age: %d, nb lapins: %ld, nbSurvivants: %ld\n", age, nbLapins, nbSurvivants); */
-
   return nbSurvivants;
 }
 
+/**
+ * @brief  Calcul le nombre de portées pour une femelle sur une année suivant
+ *         une loi normale (probabilités hard-codées).
+ *
+ * @return  Nombre de porté sur l'année en cours.
+ */
 int calculNbPortees() {
   int nbPortees = 8;
   int r = genrand_real1();
@@ -72,13 +97,21 @@ int calculNbPortees() {
   return nbPortees;
 }
 
+/**
+ * @brief  Calcul le nombre de naissances entre l'année N - 1 et l'année N.
+ *
+ * @param  population  Population de lapins.
+ * @param  annee       Année pour laquelle on calcul les naissances.
+ */
 void calculNaissance(data_t * populations, int annee) {
   unsigned long i;
   int j, k;
   int nbPortees, nbPetits;
   int estMale;
+  unsigned long nbLapins = // on suppose qu'il faut minimum 1 mal pour 2 femelles
+    minLapins(populations[annee - 1].f, 2 * populations[annee - 1].m);
 
-  for (i = 0; i < populations[annee - 1].f; ++i) {
+  for (i = 0; i < nbLapins; ++i) {
     nbPortees = calculNbPortees();
 
     for (j = 0; j < nbPortees; ++j) {
@@ -95,6 +128,12 @@ void calculNaissance(data_t * populations, int annee) {
   }
 }
 
+/**
+ * @brief  Calcul les naissances et les morts pour l'année N.
+ *
+ * @param  population  Population de lapins.
+ * @param  annee       Année pour laquelle on calcul les naissances.
+ */
 void calculNouvelleAnnee(data_t *populations, int annee) {
   int i;
   int nombreF = 0;
@@ -109,9 +148,9 @@ void calculNouvelleAnnee(data_t *populations, int annee) {
   populations[annee].nbF[0] = 0;
   populations[annee].nbM[0] = 0;
 
-  // calcul des naissances
-  // TODO: optimize this (put it in the loop above)
-  for (i = 0; i < 14; ++i) {
+  // calcul du nombre de mal et de femelles adultes pour pouvoir calculer les
+  // naissances
+  for (i = 1; i < 14; ++i) {
     nombreF += populations[annee].nbF[i];
     nombreM += populations[annee].nbM[i];
   }
@@ -122,6 +161,15 @@ void calculNouvelleAnnee(data_t *populations, int annee) {
   calculNaissance(populations, annee);
 }
 
+/**
+ * @brief  Permet d'initialiser la population de lapins pour la première année.
+ * Le nombre de mâles et de femelles sont des constantes pré-processeur.
+ *
+ * @param  n  Le nombre d'années à simuler (pour allocation dynamique du tableau
+ *            des années).
+ *
+ * @return  Population à la première année.
+ */
 data_t* initPopulations(int n) {
   int i;
   data_t* populations = malloc(n * sizeof(data_t));
@@ -143,6 +191,13 @@ data_t* initPopulations(int n) {
   return populations;
 }
 
+/**
+ * @brief  Calcul le nombre de lapins sur `n` années
+ *
+ * @param  n  nombre d'années à simuler.
+ *
+ * @return  Population sur n années.
+ */
 data_t* computeNbLapins(int n) {
   int i;
   data_t* populations;
@@ -155,6 +210,16 @@ data_t* computeNbLapins(int n) {
   return populations;
 }
 
+/******************************************************************************/
+/*                           FONCTIONS D'AFFICHAGE                            */
+/******************************************************************************/
+
+/**
+ * @brief  Affiche des statistiques sur la population à l'année `annee`
+ *
+ * @param  population  Population de lapins.
+ * @param  annee       Année à afficher
+ */
 void affichePopulation(data_t *population, int annee) {
   int i;
 
@@ -180,45 +245,55 @@ void affichePopulation(data_t *population, int annee) {
 }
 
 /**
- * NAME: afficheLapinAn
+ * @brief  Permet d'afficher des statistiques sur la dernière année.
  *
- * Permet d'afficher le nombre de lapins dans une population sur `n` années.
- *
- * PARAMS:
- * n - nombre d'années à traiter
- *
- * OUTPUT:
- * - affiche le nombre de lapins par ans
- *
- * SIDE-EFFECTS:
- * - sauvegarde ces données dans un tableau
- *
- * RETURN:
- * return what
+ * @param  n  nombre d'années à simuler.
  */
-void afficheLapinAn(int n) {
+void afficheLapin20(int n) {
   int annee;
   data_t *population = computeNbLapins(n);
 
+  printf("==================\n");
+  printf("nombre de males:\n");
   for (annee = 0; annee < n; ++annee) {
-    printf("annee %d: ", annee + 1);
-    afficheData("adultes: %nbf %nbm, petits: %pf %pm, total: %t\n", population[annee]);
-    /* affichePopulation(population, annee); */
-    /* afficheData("%nbm\n", population[annee]); */
-    /* afficheData("males min %m[1] mal max %m[14]\n", population[annee]); */
-    /* afficheData("femeles ages min: %f[2]\nfemelles age max: %f[14]\n\n", population[annee]); */
+    printf("%d ", annee + 1);
+    afficheData("%nbm\n", population[annee]);
   }
+  printf("==================\n");
+  printf("nombre de femelles:\n");
+  for (annee = 0; annee < n; ++annee) {
+    printf("%d ", annee + 1);
+    afficheData("%nbf\n", population[annee]);
+  }
+  printf("==================\n");
+  printf("nombre de petits (f m):\n");
+  for (annee = 0; annee < n; ++annee) {
+    printf("%d ", annee + 1);
+    afficheData("%npf %npm\n", population[annee]);
+  }
+  printf("==================\n");
+  printf("nombre de de lapins par ages (f m):\n");
+  for (annee = 0; annee < n; ++annee) {
+    printf("%d:\n", annee + 1);
+    afficheData("    %pf %pm\n", population[annee]);
+    for (int i = 0; i < 14; ++i) {
+      printf("%d %ld %ld\n", i, population[annee].nbF[i], population[annee].nbM[i]);
+    }
+  }
+  free(population);
 }
+
+/******************************************************************************/
+/*                                    MAIN                                    */
+/******************************************************************************/
 
 int main(void)
 {
-  /* Model de Fibonacci: */
+  /* Modèle de Fibonacci: */
   /* modelFib(20); */
 
-  /* Model réaliste: */
+  /* Modèle réaliste: */
   initMT();
-  /* for (int i = 0; i < 10; ++i){ */
-    afficheLapinAn(20);
-  /* } */
+  afficheLapin20(20);
   return 0;
 }
