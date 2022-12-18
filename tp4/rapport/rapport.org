@@ -53,7 +53,7 @@ Le but de ce tp est de proposer une simulation plus réaliste d'une population d
 lapins sur un certain nombre d'années. On commencera par une modèle très basique
 créé par Fibonacci. Ensuite nous étudierons un modèle plus réaliste où les
 lapins auront une probabilité de survie, un nombre de portées par ans et de
-petits par portées. Pour ce faire nous utiliserons le PRNG *Mercenne Twister*.
+petits par portées. Pour ce faire nous utiliserons le PRNG *Mersenne Twister*.
 
 * Simulation avec Fibonacci
 
@@ -63,7 +63,7 @@ Fibonacci est très simple, elle suit le principe suivant:
 - $x_{n} = x_{n - 1} + x_{n - 1}$
 
 On part donc avec 2 petits lapins ($x_{0}$ et $x_{1}$) et on simule le nombre
-lapins sur *n* mois selon la suite décrite plus tôt. Le code le la fonctions est
+lapins sur *n* mois selon la suite décrite plus tôt. Le code de la fonctions est
 le suivant:
 
 #+NAME: suite de Fibonacci
@@ -88,7 +88,7 @@ void modelFib(int n) {
 
 Cette simulation n'est vraiment pas réaliste car tous les lapins produisent le
 même nombre de petits. De plus on ne prend pas en compte l'âge ou le sexe des
-lapins et les lapins on une durée de vie illimitée. C'est pour cela que le
+lapins et les lapins ont une durée de vie illimitée. C'est pour cela que le
 nombre de lapins sur n mois augmente extrêmement vite.
 
 * Simulation réaliste
@@ -97,23 +97,23 @@ Intéressons nous maintenant à une simulation plus réaliste. Ici nous prendron
 en compte les données suivantes pour calculer le nombre de lapins sur n années:
 
 - Nombre de portées pour une femelle sur une année: 4 à 8 (calculé selon une loi normale)
-- Nombre de petits par portées: 3 à 6 (suivant loi uniforme)
-  - 50% de chance pour que le petit soit une mâle ou une femelle.
+- Nombre de petits par portée: 3 à 6 (suivant loi uniforme)
+  - 50% de chance pour que le petit soit un mâle ou une femelle.
 - Maturité sexuelle: après 1 an
 - Survivabilité:
-  - Pour les petit: 35%
+  - Pour les petits: 35%
   - Pour les adultes de moins de 10 ans: 60%
   - Pour les adultes de plus de 10 ans: diminution de 10% par an
-  - Un lapins vie au maximum 15 ans (années 0 jusqu'à 14)
+  - Un lapin vit au maximum 15 ans (années 0 jusqu'à 14)
 
 
 À noter qu'ici le pas est l'année, mais on pourrait complexifier la simulation
-en modifiant les données et en calculant au moi près pour plus de précisions. De
+en modifiant les données et en calculant au mois près pour plus de précisions. De
 plus, ici les lapins ne peuvent mourir que de vieillesse mais on pourrait
-ajouter d'autres raisons comme par exemple des prédateurs, des accident naturels
-(feu, ...) ou encore la probabilité qu'uns épidémie se déclare durant une année.
+ajouter d'autres raisons comme par exemple des prédateurs, des accidents naturels
+(feu, ...) ou encore la probabilité qu'une épidémie se déclare durant une année.
 
-** Calcule du nombre de lapins
+** Calcul du nombre de lapins
 *** Structure de données
 
 Pour cette simulation nous utiliserons un tableau de taille =n= qui contiendra les
@@ -166,9 +166,9 @@ int nbSurvivants(int age, unsigned long int nbLapins) {
 
 *** Calcul des naissances 
 
-Pour le calcule des naissance nous utiliserons deux fonctions. La première
+Pour le calcul des naissances nous utiliserons deux fonctions. La première
 fonction permet de calculer le nombre de portées pour une femelle sur une
-année. Comme dit plus tôt, une femelle peut avoir entre 4 et 8 portées par ans
+année. Comme dit précédemment, une femelle peut avoir entre 4 et 8 portées par an
 et le nombre de portées suit une loi normale. Le code est le suivant:
 
 #+NAME: Calcul du nombre de portées
@@ -191,7 +191,7 @@ int calculNbPortees() {
 }
 #+END_SRC
 
-Ici pour gagner du temps de calcul, la loi normale est codé en dur et suit les
+Ici pour gagner du temps de calcul, la loi normale est codée en dur et suit les
 valeurs suivantes:
 
 | nombre de petits |  4 |  5 |  6 |  7 |  8 |
@@ -205,7 +205,7 @@ femelles. Ensuite, pour chaque lapin apte à se reproduire, on calcule le nombre
 de portées. Puis pour chaque portée, on calcule le nombre de petits (compris
 entre 3 et 6 suivant une loi uniforme): =nbPetits = genrand_int32()%4 + 3=.
 Enfin, pour chaque petit, on calcule le sexe (50/50) puis on ajoute le nouveau
-petits au nombre de petits mâles ou au nombre de petites femelles.
+petit au nombre de petits mâles ou au nombre de petites femelles.
 
 #+BEGIN_SRC c
 void calculNaissance(data_t * populations, int annee) {
@@ -240,13 +240,13 @@ l'année et =populations[annee].nbM[0]= le nombre de petits mâles.
 *** Calcul du nombre de lapins sur une année
 
 Pour calculer le nombre de lapins sur une nouvelle année, nous utiliserons la
-fonctions suivante. Le principe est très simple, on commence par faire vieillir
-les lapins, pour se faire, on calcul le nombre de survivants chez les mâles et
+fonction suivante. Le principe est très simple, on commence par faire vieillir
+les lapins, pour ce faire, on calcule le nombre de survivants chez les mâles et
 les femelles de l’année précédente (avec la fonction =nbSurvivants=). Le calcul
 est fait sur les lapins de l'année *N* âgés de *Y* ans et la valeur calculée est
-stockée dans la case *Y + 1* des lapins de l'année *N + 1*. De se fait, tous les
+stockée dans la case *Y + 1* des lapins de l'année *N + 1*. De ce fait, tous les
 lapins survivants vieillissent de 1 an et les lapins âgés de plus de 15 ans
-meurent. Ensuite on met le nombre de petits à 0. Une fois ceci fait, on met à
+meurent. Ensuite on met le nombre de petits à 0. Une fois fait, on met à
 jour le nombre de mâles et de femelles adultes.
 
 #+BEGIN_SRC c
@@ -278,7 +278,7 @@ void calculNouvelleAnnee(data_t *populations, int annee) {
 }
 #+END_SRC
 
-Enfin, on utiles la fonction décrite précédemment pour calculer le nombre de naissance.
+Enfin, on utile la fonction décrite précédemment pour calculer le nombre de naissances.
 
 \pagebreak{}
 
@@ -314,7 +314,7 @@ toutes les statistiques sur la population de chacune des années.
 Voici quelques statistiques sur la simulation. Dans les 2 premiers graphiques,
 on peut constater que l'évolution des lapins est *exponentielle*. De plus le
 nombre de mâles est *équivalent* au nombre de femelles, ce qui est logique compte
-tenu du fait que la probabilité qu'un petit soit un mâle ou un femelles est de
+tenu du fait que la probabilité qu'un petit soit un mâle ou une femelles est de
 50%.
 
 #+CAPTION: Évolution du nombre de mâles.
@@ -329,18 +329,18 @@ tenu du fait que la probabilité qu'un petit soit un mâle ou un femelles est de
 
 Dans ce dernier graphe, on peut observer le nombre de mâles et de femelles en
 fonction de leur âge. On constate un immense nombre de petits et on peut
-nettement voir le fait que très peut de petits survivent puisqu'il y a un très
-gros gap entre le nombre de petits et le nombre de lapins âgés de 1 ans.
+nettement voir le fait que très peu de petits survivent puisqu'il y a un très
+gros écart entre le nombre de petits et le nombre de lapins âgés de 1 ans.
 
 #+CAPTION: Évolution du nombre de lapins par âges la dernière année.
 [[./img/lapinsAge.png]]
 
 \FloatBarrier
 
-Enfin, ce dernier graphe nous montre aussi que le nombre de lapin survivant
+Enfin, ce dernier graphe nous montre aussi que le nombre de lapins survivants
 décroît extrêmement vite ce qui pourrait sembler illogique par rapport au fait que
-la population crois de façon exponentielle. On peut donc en conclure que la
-majorité des lapin sont toujours des jeunes et que la croissance de la
+la population croît de façon exponentielle. On peut donc en conclure que la
+majorité des lapins sont toujours des jeunes et que la croissance de la
 population des lapins est uniquement due à leur capacité à se reproduire plutôt
 qu'à leur longévité.
 
@@ -349,17 +349,17 @@ qu'à leur longévité.
 Dans ce tp, on a pu observer que le modèle basique proposé par Fibonacci était
 peu réaliste et on a pu proposer un modèle plus complexe permettant de calculer
 beaucoup plus précisément le nombre de naissances et de morts. Cependant, bien
-que notre simulation soit plus réaliste, elle reste très éloigné de la
+que notre simulation soit plus réaliste, elle reste très éloignée de la
 réalité. Une simulation n'est jamais vraiment représentative de la réalité, mais
 elle peut s'en approcher, le modèle simulé peut toujours être complexifié pour
-gagner en précision. Par exemple nous aurions pu prendre un pas un moi, ou même
-en jours. Nous aurions aussi pu rajouter d'autres évènements causant la morts
-des lapins ou altérant leur capacité à se reproduire comme des épidémie, les
-mois de l'année (des mort du froid en hiver, ou de soif en été en cas de
+gagner en précision. Par exemple nous aurions pu prendre comme pas le mois, ou même
+le jour. Nous aurions aussi pu rajouter d'autres évènements causant la morts
+des lapins ou altérant leur capacité à se reproduire comme des épidémies, les
+mois de l'année (des morts de froid en hiver, ou de soif en été en cas de
 sécheresse).
 
 Il faut tout de même noter le temps de calcul extrêmement long pour ce modèle,
 aussi simple soit-il. La limitation technique est à prendre en compte lorsqu'on
 décide de créer une simulation et il faut savoir garder sa simulation épurée de
-tout évènements inintéressant qui pourrait engendrer des calculs inutiles. Il
+tout évènement inintéressant qui pourrait engendrer des calculs inutiles. Il
 faut se concentrer sur ce que l'on souhaite observer.
